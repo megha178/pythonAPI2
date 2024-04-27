@@ -6,7 +6,6 @@ tc2 verify the body id
 tc3 verify json shcema is valid
 '''
 import pytest
-import requests
 
 from src.constant.apiconstant import base_url, url_create_booking, url_update_delete_booking, url_create_token
 from src.helpers.api_wrapper import post_request, put_data, delete_data
@@ -16,6 +15,7 @@ from src.helpers.common_verification import *
 
 
 class TestIntegration(object):
+
     @pytest.fixture()
     def test_create_token(self):
         response_token = post_request(url_create_token(), headers=common_headers(), auth=None,
@@ -37,7 +37,8 @@ class TestIntegration(object):
         print("after token", temp_token)
 
         put_url = url_update_delete_booking(test_create_booking_tc1)
-        print("URL for updating booking:", put_url)  # Print the URL for updating the booking
+        print("URL for updating booking:", put_url)
+        print("updtaed_booking", test_create_booking_tc1)  # Print the URL for updating the booking
 
         response_update = put_data(put_url, payload=payload_update_booking(),
                                    headers=update_headers(temp_token))
@@ -47,7 +48,26 @@ class TestIntegration(object):
     def test_delete_booking(self, test_create_booking_tc1, test_create_token):
         temp_token = test_create_token
         print("after token", temp_token)
-        print("id which we want to delete",test_create_booking_tc1)
+        print("before_deleting", test_create_booking_tc1)
         delete_url = url_update_delete_booking(test_create_booking_tc1)
 
         response_delete = delete_data(delete_url, headers=update_headers(temp_token))
+        verify_http_code(response_delete,201)
+
+        deleted_booking_id = test_create_booking_tc1
+        print("Deleted booking ID:", deleted_booking_id)
+
+        print("Deleted booking ID:", deleted_booking_id)
+        return deleted_booking_id
+
+    def test_try_to_update_deleted_bookingid(self, test_create_token, test_create_booking_tc1):
+        deleted_booking_id = self.test_delete_booking(test_create_booking_tc1, test_create_token)
+        temp_token = test_create_token
+
+        url = url_update_delete_booking(deleted_booking_id)
+        print("Deleted booking IDklkkl:", deleted_booking_id)
+        print("URL", url)
+
+        response_try_update = put_data(url, payload=payload_update_booking(), headers=update_headers(temp_token))
+        verify_http_code(response_try_update,405)
+    #  assert response_try_update.status_code == 405, "Expected status code 405 for attempting to update a deleted booking"
