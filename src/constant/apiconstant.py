@@ -14,4 +14,4 @@ def url_create_booking():
 
 
 def url_update_delete_booking(bookingid):
-    return "https://restful-booker.herokuapp.com/booking/" + bookingid
+    return "https://restful-booker.herokuapp.com/booking/" + str(bookingid)
